@@ -74,6 +74,14 @@ namespace Hostele.Areas.Admin.Controllers
             }
             var roles = await _userManager.GetRolesAsync(user);
             var result = await _userManager.RemoveFromRolesAsync(user, roles);
+            
+            /*var lockoutEndDate = new DateTime(2999,01,01);
+            await _userManager.SetLockoutEnabledAsync(user, true);
+            await _userManager.SetLockoutEndDateAsync(user, lockoutEndDate);*/
+                
+            //await _userManager.SetLockoutEnabledAsync(user, false);
+            
+            
             if (!result.Succeeded)
             {
                 ModelState.AddModelError("", "Cannot remove user existing roles");

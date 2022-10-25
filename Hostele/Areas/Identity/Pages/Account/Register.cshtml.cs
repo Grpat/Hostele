@@ -23,6 +23,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Hostele.Areas.Identity.Pages.Account
 {
+    [Authorize(Roles=SD.Role_Admin)]
     public class RegisterModel : PageModel
     {
         private readonly SignInManager<AppUser> _signInManager;

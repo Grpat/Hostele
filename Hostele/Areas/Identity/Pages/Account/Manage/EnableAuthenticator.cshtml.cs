@@ -10,6 +10,8 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Hostele.Models;
+using Hostele.Utility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -17,6 +19,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Hostele.Areas.Identity.Pages.Account.Manage
 {
+    [Authorize(Roles=SD.Role_Admin)]
     public class EnableAuthenticatorModel : PageModel
     {
         private readonly UserManager<AppUser> _userManager;
