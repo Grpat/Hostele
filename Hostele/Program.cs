@@ -27,7 +27,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
 });
 
-builder.Services.Configure<IdentityOptions>(options =>
+/*builder.Services.Configure<IdentityOptions>(options =>
 {
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
@@ -35,7 +35,7 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequireUppercase = true;
     options.Password.RequiredLength = 12;
     options.Password.RequiredUniqueChars = 1;
-});
+});*/
 
 var app = builder.Build();
 
