@@ -1,4 +1,6 @@
-﻿using Hostele.Models;
+﻿using System.Linq;
+using Hostele.Models;
+using Hostele.Utility;
 using Hostele.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +23,15 @@ namespace Hostele.Areas.Admin.Controllers
         }
         public async Task<IActionResult> Index()
         {
+            
             var users = await _userManager.Users.ToListAsync();
+            var admins = await _userManager.GetUsersInRoleAsync(SD.Role_Admin);
+                
+            foreach (var admin in admins)
+            {
+                users.RemoveAll(c => c.Id == admin.Id);
+            }
+           
             var userRolesViewModel = new List<UserRolesViewModel>();
             foreach (AppUser user in users)
             {
@@ -72,15 +82,9 @@ namespace Hostele.Areas.Admin.Controllers
             {
                 return View();
             }
+            
             var roles = await _userManager.GetRolesAsync(user);
             var result = await _userManager.RemoveFromRolesAsync(user, roles);
-            
-            /*var lockoutEndDate = new DateTime(2999,01,01);
-            await _userManager.SetLockoutEnabledAsync(user, true);
-            await _userManager.SetLockoutEndDateAsync(user, lockoutEndDate);*/
-                
-            //await _userManager.SetLockoutEnabledAsync(user, false);
-            
             
             if (!result.Succeeded)
             {
@@ -95,6 +99,114 @@ namespace Hostele.Areas.Admin.Controllers
             }
             return RedirectToAction("Index");
         }
+        public async Task<IActionResult> Delete(string userId)
+        {
+            ViewBag.userId = userId;
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                ViewBag.ErrorMessage = $"User with Id = {userId} cannot be found";
+                return View();
+            }
+            ViewBag.UserName = user.UserName;
+            return View();
+        }
+        
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirm(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return View();
+            }
+            
+            var result = await _userManager.DeleteAsync(user);
+            
+            if (!result.Succeeded)
+            {
+                ModelState.AddModelError("", "Cannot remove user");
+                return View();
+            }
+            return RedirectToAction("Index");
+        }
+        
+        
+        public async Task<IActionResult> Lock(string userId)
+        {
+            ViewBag.userId = userId;
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                ViewBag.ErrorMessage = $"User with Id = {userId} cannot be found";
+                return View();
+            }
+            ViewBag.UserName = user.UserName;
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> Lock(LockoutDateViewModel model, string userId)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    return View();
+                }
+
+                await _userManager.SetLockoutEnabledAsync(user, true);
+                var result = await _userManager.SetLockoutEndDateAsync(user, model.LockoutDate);
+                
+
+                if (!result.Succeeded)
+                {
+                    ModelState.AddModelError("", "Cannot set Lockout for user");
+                    return View(model);
+                }
+                return RedirectToAction("Index");
+            }
+            return View(model);
+        }
+        
+        
+         public async Task<IActionResult> Unlock(string userId)
+        {
+            ViewBag.userId = userId;
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                ViewBag.ErrorMessage = $"User with Id = {userId} cannot be found";
+                return View();
+            }
+            ViewBag.UserName = user.UserName;
+            return View();
+        }
+        [HttpPost]
+        [HttpPost, ActionName("Unlock")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UnlockConfirm(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return View();
+            }
+            
+            var result = await _userManager.SetLockoutEnabledAsync(user,false);
+            
+            if (!result.Succeeded)
+            {
+                ModelState.AddModelError("", "Cannot unlock account");
+                return View();
+            }
+            return RedirectToAction("Index");
+        }
+
+        
+        
+        
         private async Task<List<string>> GetUserRoles(AppUser user)
         {
             return new List<string>(await _userManager.GetRolesAsync(user));
