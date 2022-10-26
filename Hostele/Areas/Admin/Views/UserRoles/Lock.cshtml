@@ -1,0 +1,26 @@
+﻿@model Hostele.ViewModels.LockoutDateViewModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "Lock User Account";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<form method="post">
+    <div class="card">
+        <div class="card-header">
+            <h2>Lock user @ViewBag.UserName </h2>
+        </div>
+        <div class="card-footer">
+            <form asp-action="Lock">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="LockoutDate" class="control-label"></label>
+                    <input asp-for="LockoutDate" class="form-control"/>
+                    <span asp-validation-for="LockoutDate" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Lock" class="btn btn-primary"/>
+                </div>
+            </form>
+        </div>
+    </div>
+</form>
