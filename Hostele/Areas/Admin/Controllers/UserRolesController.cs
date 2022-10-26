@@ -23,7 +23,6 @@ namespace Hostele.Areas.Admin.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            
             var users = await _userManager.Users.ToListAsync();
             var admins = await _userManager.GetUsersInRoleAsync(SD.Role_Admin);
                 

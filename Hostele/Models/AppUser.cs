@@ -6,4 +6,5 @@ namespace Hostele.Models;
 public class AppUser:IdentityUser
 {
     public string Name { get; set; }
+    public bool IsInitialLogin { get; set; } = false;
 }
