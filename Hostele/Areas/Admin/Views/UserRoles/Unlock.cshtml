@@ -1,0 +1,17 @@
+﻿@model List<Hostele.ViewModels.ManageUserRolesViewModel>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "Unlock User Account";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<form method="post">
+    <div class="card">
+        <div class="card-header">
+            <h2>Are you sure you want to unlock @ViewBag.UserName </h2>
+        </div>
+        <div class="card-footer">
+            <input type="submit" value="unlock" class="btn btn-primary"
+                   style="width:auto" />
+        </div>
+    </div>
+</form>

@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Hostele.Models;
+using Hostele.Utility;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -101,10 +102,12 @@ namespace Hostele.Areas.Identity.Pages.Account
                 // Don't reveal that the user does not exist
                 return RedirectToPage("./ResetPasswordConfirmation");
             }
-
+            
             var result = await _userManager.ResetPasswordAsync(user, Input.Code, Input.Password);
             if (result.Succeeded)
             {
+                user.IsInitialLogin = true;
+                await _userManager.AddToRoleAsync(user, SD.Role_User);
                 return RedirectToPage("./ResetPasswordConfirmation");
             }
 

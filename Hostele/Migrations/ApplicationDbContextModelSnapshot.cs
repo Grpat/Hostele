@@ -41,6 +41,9 @@ namespace Hostele.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsInitialLogin")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
@@ -126,7 +129,7 @@ namespace Hostele.Migrations
                     b.Property<double>("CenaZaNocleg")
                         .HasColumnType("float");
 
-                    b.Property<int?>("HostelId")
+                    b.Property<int>("HostelId")
                         .HasColumnType("int");
 
                     b.Property<int>("IloscLozek")
@@ -285,12 +288,10 @@ namespace Hostele.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ProviderKey")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("nvarchar(max)");
@@ -327,12 +328,10 @@ namespace Hostele.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("LoginProvider")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Name")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Value")
                         .HasColumnType("nvarchar(max)");
@@ -346,7 +345,9 @@ namespace Hostele.Migrations
                 {
                     b.HasOne("Hostele.Models.Hostel", "Hostel")
                         .WithMany("Pokoje")
-                        .HasForeignKey("HostelId");
+                        .HasForeignKey("HostelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Hostele.Models.Rodzaj", "Rodzaj")
                         .WithMany()

@@ -1,10 +1,15 @@
+@using Hostele.Models
+@using Microsoft.AspNetCore.Identity
 @model List<Hostele.ViewModels.UserRolesViewModel>
+@inject SignInManager<AppUser> SignInManager
+@inject UserManager<AppUser> UserManager
+
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<h1>User Roles</h1>
+<h1>Manage Users</h1>
 <table class="table table-striped">
     <thead>
     <tr>
@@ -17,12 +22,28 @@
     <tbody>
     @foreach (var user in Model)
     {
+        var currentUser = await UserManager.FindByIdAsync(user.UserId);
         <tr>
             <td>@user.Name</td>
             <td>@user.Email</td>
             <td>@string.Join(" , ", user.Roles.ToList())</td>
             <td>
                 <a class="btn btn-primary" asp-controller="UserRoles" asp-action="Manage" asp-route-userId="@user.UserId">Manage Roles</a>
+            </td>
+            @if (!await UserManager.IsLockedOutAsync(currentUser))
+            {
+                <td>
+                    <a class="btn btn-outline-danger" asp-controller="UserRoles" asp-action="Lock" asp-route-userId="@user.UserId">Lock</a>
+                </td>
+            }
+            else
+            {
+                <td>
+                    <a class="btn btn-outline-danger" asp-controller="UserRoles" asp-action="Unlock" asp-route-userId="@user.UserId">Unlock</a>
+                </td>
+            }
+            <td>
+                <a class="btn btn-danger" asp-controller="UserRoles" asp-action="Delete" asp-route-userId="@user.UserId">Delete</a>
             </td>
         </tr>
     }

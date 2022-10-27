@@ -1,0 +1,31 @@
+﻿@model Hostele.Areas.Admin.ViewModels.PasswordRestrictionViewModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    * {
+        margin: 2px;
+    }
+    
+    div.background {
+        background-color: lightgray;
+        color: black;
+    }
+</style>
+<form method="post" asp-action="Index" asp-controller="PasswordRestrictions">
+    <div class="background">Minimalna długość i ograniczenia</div>
+    <label>Długość hasła:</label>
+    <input asp-for="MinLength" type="number" value="@Model.MinLength" onchange="this.form.submit()"/>
+    <br/>
+    <label>Wymagana cyfra:</label>
+    @if (Model.RequiredNumber)
+    {
+        <input asp-for="RequiredNumber" type="checkbox" checked onchange="this.form.submit()"/>
+    }
+    else
+    {
+        <input asp-for="RequiredNumber" type="checkbox" onchange="this.form.submit()"/>
+    }
+</form>

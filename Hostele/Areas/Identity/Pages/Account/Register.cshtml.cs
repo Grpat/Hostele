@@ -23,6 +23,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Hostele.Areas.Identity.Pages.Account
 {
+    [Authorize(Roles=SD.Role_Admin)]
     public class RegisterModel : PageModel
     {
         private readonly SignInManager<AppUser> _signInManager;
@@ -132,8 +133,6 @@ namespace Hostele.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
-                    await _userManager.AddToRoleAsync(user, SD.Role_User);
-                    
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
@@ -152,8 +151,7 @@ namespace Hostele.Areas.Identity.Pages.Account
                     }
                     else
                     {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-                        return LocalRedirect(returnUrl);
+                        return RedirectToAction("Index", "UserRoles", new { area = "Admin" });
                     }
                 }
                 foreach (var error in result.Errors)
