@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Hostele.Areas.Admin.ViewModels;
 using Hostele.Models;
 using Hostele.Models.ViewModels;
 using Hostele.ViewModels;
@@ -31,8 +32,9 @@ public class HostelProfile:Profile
         
         CreateMap< Wypozyczenie,WypozyczenieCreateViewModel>();
         CreateMap<WypozyczenieCreateViewModel,Wypozyczenie>();
-        
-        
+
+        CreateMap<Aktywnosc, ActivitiesViewModel>();
+        CreateMap<ActivitiesViewModel, Aktywnosc>();
 
     }
 }

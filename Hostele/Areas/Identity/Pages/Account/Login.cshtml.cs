@@ -8,6 +8,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Hostele.Data;
 using Microsoft.AspNetCore.Authorization;
 using Hostele.Models;
 using Microsoft.AspNetCore.Authentication;
@@ -24,12 +25,14 @@ namespace Hostele.Areas.Identity.Pages.Account
         private readonly SignInManager<AppUser> _signInManager;
         private readonly ILogger<LoginModel> _logger;
         private readonly UserManager<AppUser> _userManager;
+        private ApplicationDbContext _context;
 
-        public LoginModel(SignInManager<AppUser> signInManager, ILogger<LoginModel> logger,UserManager<AppUser> userManager, IHttpContextAccessor httpContextAccessor)
+        public LoginModel(SignInManager<AppUser> signInManager, ILogger<LoginModel> logger,UserManager<AppUser> userManager, IHttpContextAccessor httpContextAccessor, ApplicationDbContext context)
         {
             _signInManager = signInManager;
             _logger = logger;
             _userManager = userManager;
+            _context = context;
         }
 
         /// <summary>
@@ -126,6 +129,15 @@ namespace Hostele.Areas.Identity.Pages.Account
                         return Redirect("Manage/ChangePassword");
                     }
                     _logger.LogInformation("User logged in.");
+
+                    _context.Aktywnosci.Add(new Aktywnosc
+                    {
+                        User = Input.Email,
+                        CzasAktywnosci = DateTime.Now,
+                        OpisAktywnosci = "Logowanie"
+                    });
+                    await _context.SaveChangesAsync();
+                    
                     return LocalRedirect(returnUrl);
                 }
                 if (result.RequiresTwoFactor)

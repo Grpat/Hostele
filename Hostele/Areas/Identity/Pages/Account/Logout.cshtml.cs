@@ -4,6 +4,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Hostele.Data;
 using Microsoft.AspNetCore.Authorization;
 using Hostele.Models;
 using Microsoft.AspNetCore.Identity;
@@ -17,17 +18,31 @@ namespace Hostele.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<AppUser> _signInManager;
         private readonly ILogger<LogoutModel> _logger;
+        private ApplicationDbContext _context;
 
-        public LogoutModel(SignInManager<AppUser> signInManager, ILogger<LogoutModel> logger)
+        public LogoutModel(SignInManager<AppUser> signInManager, ILogger<LogoutModel> logger, ApplicationDbContext context)
         {
             _signInManager = signInManager;
             _logger = logger;
+            _context = context;
         }
 
         public async Task<IActionResult> OnPost(string returnUrl = null)
         {
+            var user = await _signInManager.UserManager.GetUserAsync(User);
+            var email = await _signInManager.UserManager.GetEmailAsync(user);
+            
             await _signInManager.SignOutAsync();
             _logger.LogInformation("User logged out.");
+
+            _context.Aktywnosci.Add(new Aktywnosc
+            {
+                User = email,
+                CzasAktywnosci = DateTime.Now,
+                OpisAktywnosci = "Wylogowywanie"
+            });
+            await _context.SaveChangesAsync();
+            
             if (returnUrl != null)
             {
                 return RedirectToAction("Index","Home");

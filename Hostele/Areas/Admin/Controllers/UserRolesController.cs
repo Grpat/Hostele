@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Hostele.Data;
 using Hostele.Models;
 using Hostele.Utility;
 using Hostele.ViewModels;
@@ -15,11 +16,13 @@ namespace Hostele.Areas.Admin.Controllers
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private ApplicationDbContext _context;
 
-        public UserRolesController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager)
+        public UserRolesController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, ApplicationDbContext context)
         {
             _roleManager = roleManager;
             _userManager = userManager;
+            _context = context;
         }
         public async Task<IActionResult> Index()
         {
@@ -77,13 +80,25 @@ namespace Hostele.Areas.Admin.Controllers
         public async Task<IActionResult> Manage(List<ManageUserRolesViewModel> model, string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
+            var userEmail = await _userManager.GetEmailAsync(user);
             if (user == null)
             {
                 return View();
             }
             
+            var currentUser = await _userManager.GetUserAsync(User);
+            var email = await _userManager.GetEmailAsync(currentUser);
+            
             var roles = await _userManager.GetRolesAsync(user);
             var result = await _userManager.RemoveFromRolesAsync(user, roles);
+            
+            _context.Aktywnosci.Add(new Aktywnosc
+            {
+                User = email,
+                CzasAktywnosci = DateTime.Now,
+                OpisAktywnosci = $"Usunięto role użytkownikowi {userEmail}"
+            });
+            await _context.SaveChangesAsync();
             
             if (!result.Succeeded)
             {
@@ -91,11 +106,21 @@ namespace Hostele.Areas.Admin.Controllers
                 return View(model);
             }
             result = await _userManager.AddToRolesAsync(user, model.Where(x => x.Selected).Select(y => y.RoleName));
+
             if (!result.Succeeded)
             {
                 ModelState.AddModelError("", "Cannot add selected roles to user");
                 return View(model);
             }
+            
+            _context.Aktywnosci.Add(new Aktywnosc
+            {
+                User = email,
+                CzasAktywnosci = DateTime.Now,
+                OpisAktywnosci = $"Dodano role do użytkownika {userEmail}"
+            });
+            await _context.SaveChangesAsync();
+            
             return RedirectToAction("Index");
         }
         public async Task<IActionResult> Delete(string userId)
@@ -116,6 +141,7 @@ namespace Hostele.Areas.Admin.Controllers
         public async Task<IActionResult> DeleteConfirm(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
+            var userEmail = await _userManager.GetEmailAsync(user);
             if (user == null)
             {
                 return View();
@@ -128,6 +154,18 @@ namespace Hostele.Areas.Admin.Controllers
                 ModelState.AddModelError("", "Cannot remove user");
                 return View();
             }
+            
+            var currentUser = await _userManager.GetUserAsync(User);
+            var email = await _userManager.GetEmailAsync(currentUser);
+
+            _context.Aktywnosci.Add(new Aktywnosc
+            {
+                User = email,
+                CzasAktywnosci = DateTime.Now,
+                OpisAktywnosci = $"Usunięto użytkownika {userEmail}"
+            });
+            await _context.SaveChangesAsync();
+            
             return RedirectToAction("Index");
         }
         
@@ -150,6 +188,7 @@ namespace Hostele.Areas.Admin.Controllers
             if (ModelState.IsValid)
             {
                 var user = await _userManager.FindByIdAsync(userId);
+                var userEmail = await _userManager.GetEmailAsync(user);
                 if (user == null)
                 {
                     return View();
@@ -157,13 +196,25 @@ namespace Hostele.Areas.Admin.Controllers
 
                 await _userManager.SetLockoutEnabledAsync(user, true);
                 var result = await _userManager.SetLockoutEndDateAsync(user, model.LockoutDate);
-                
+
 
                 if (!result.Succeeded)
                 {
                     ModelState.AddModelError("", "Cannot set Lockout for user");
                     return View(model);
                 }
+                
+                var currentUser = await _userManager.GetUserAsync(User);
+                var email = await _userManager.GetEmailAsync(currentUser);
+
+                _context.Aktywnosci.Add(new Aktywnosc
+                {
+                    User = email,
+                    CzasAktywnosci = DateTime.Now,
+                    OpisAktywnosci = $"Zablokowano usera {userEmail}"
+                });
+                await _context.SaveChangesAsync();
+
                 return RedirectToAction("Index");
             }
             return View(model);
@@ -188,6 +239,7 @@ namespace Hostele.Areas.Admin.Controllers
         public async Task<IActionResult> UnlockConfirm(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
+            var userEmail = await _userManager.GetEmailAsync(user);
             if (user == null)
             {
                 return View();
@@ -200,6 +252,18 @@ namespace Hostele.Areas.Admin.Controllers
                 ModelState.AddModelError("", "Cannot unlock account");
                 return View();
             }
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            var email = await _userManager.GetEmailAsync(currentUser);
+
+            _context.Aktywnosci.Add(new Aktywnosc
+            {
+                User = email,
+                CzasAktywnosci = DateTime.Now,
+                OpisAktywnosci = $"Odblokowano usera {userEmail}"
+            });
+            await _context.SaveChangesAsync();
+            
             return RedirectToAction("Index");
         }
 

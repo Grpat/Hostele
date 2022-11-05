@@ -5,6 +5,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using Hostele.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -22,15 +23,18 @@ namespace Hostele.Areas.Identity.Pages.Account
         private readonly SignInManager<AppUser> _signInManager;
         private readonly UserManager<AppUser> _userManager;
         private readonly ILogger<LoginWith2faModel> _logger;
+        private ApplicationDbContext _context;
 
         public LoginWith2faModel(
             SignInManager<AppUser> signInManager,
             UserManager<AppUser> userManager,
-            ILogger<LoginWith2faModel> logger)
+            ILogger<LoginWith2faModel> logger,
+            ApplicationDbContext context)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _logger = logger;
+            _context = context;
         }
 
         /// <summary>
@@ -113,9 +117,20 @@ namespace Hostele.Areas.Identity.Pages.Account
 
             var userId = await _userManager.GetUserIdAsync(user);
 
+            var userEmail = await _userManager.GetEmailAsync(user);
+
             if (result.Succeeded)
             {
                 _logger.LogInformation("User with ID '{UserId}' logged in with 2fa.", user.Id);
+
+                _context.Aktywnosci.Add(new Aktywnosc
+                {
+                    User = userEmail,
+                    CzasAktywnosci = DateTime.Now,
+                    OpisAktywnosci = "Logowanie dwuskładnikowe"
+                });
+                await _context.SaveChangesAsync();
+                
                 return LocalRedirect(returnUrl);
             }
             else if (result.IsLockedOut)

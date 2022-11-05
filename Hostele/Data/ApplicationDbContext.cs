@@ -20,5 +20,6 @@ public class ApplicationDbContext:IdentityDbContext<AppUser>
     public DbSet<Pokoj> Pokoje { get; set; }
     public DbSet<Wypozyczenie> Wypozyczenia { get; set; }
     public DbSet<Rodzaj> Rodzaje { get; set; }
+    public List<Aktywnosc> Aktywnosci { get; set; }
     
 }

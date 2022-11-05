@@ -1,0 +1,25 @@
+﻿@model List<Hostele.Areas.Admin.ViewModels.ActivitiesViewModel>
+@{
+    ViewData["Title"] = "Activities";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>User</th>
+        <th>Czas Aktywności</th>
+        <th>Opis Aktywności</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var activity in Model)
+    {
+        <tr>
+            <td>@activity.User</td>
+            <td>@activity.CzasAktywnosci</td>
+            <td>@activity.OpisAktywnosci</td>
+        </tr>
+    }
+    </tbody>
+</table>
