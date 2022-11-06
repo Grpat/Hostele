@@ -5,5 +5,6 @@ namespace Hostele.Repository;
 
 public interface IActivitiesRepository: IRepository<Aktywnosc>
 {
-    public List<Aktywnosc> GetAll();
+    public void AddActivity(string user, DateTime activityTime, string description);
+    public Task<List<Aktywnosc>> GetAll();
 }

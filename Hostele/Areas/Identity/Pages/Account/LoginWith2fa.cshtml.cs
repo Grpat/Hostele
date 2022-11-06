@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using Hostele.Models;
+using Hostele.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -23,18 +24,18 @@ namespace Hostele.Areas.Identity.Pages.Account
         private readonly SignInManager<AppUser> _signInManager;
         private readonly UserManager<AppUser> _userManager;
         private readonly ILogger<LoginWith2faModel> _logger;
-        private ApplicationDbContext _context;
+        private readonly IActivitiesRepository _repository;
 
         public LoginWith2faModel(
             SignInManager<AppUser> signInManager,
             UserManager<AppUser> userManager,
             ILogger<LoginWith2faModel> logger,
-            ApplicationDbContext context)
+            IActivitiesRepository repository)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _logger = logger;
-            _context = context;
+            _repository = repository;
         }
 
         /// <summary>
@@ -122,14 +123,8 @@ namespace Hostele.Areas.Identity.Pages.Account
             if (result.Succeeded)
             {
                 _logger.LogInformation("User with ID '{UserId}' logged in with 2fa.", user.Id);
-
-                _context.Aktywnosci.Add(new Aktywnosc
-                {
-                    User = userEmail,
-                    CzasAktywnosci = DateTime.Now,
-                    OpisAktywnosci = "Logowanie dwuskładnikowe"
-                });
-                await _context.SaveChangesAsync();
+                
+                _repository.AddActivity(userEmail, DateTime.Now, "Logowanie dwuskładnikowe");
                 
                 return LocalRedirect(returnUrl);
             }

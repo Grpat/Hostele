@@ -1,6 +1,8 @@
 ﻿using System.Linq;
+using System.Security.Claims;
 using Hostele.Data;
 using Hostele.Models;
+using Hostele.Repository;
 using Hostele.Utility;
 using Hostele.ViewModels;
 using Microsoft.AspNetCore.Identity;
@@ -16,13 +18,13 @@ namespace Hostele.Areas.Admin.Controllers
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        private ApplicationDbContext _context;
+        private readonly IActivitiesRepository _repository;
 
-        public UserRolesController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, ApplicationDbContext context)
+        public UserRolesController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, IActivitiesRepository repository)
         {
             _roleManager = roleManager;
+            _repository = repository;
             _userManager = userManager;
-            _context = context;
         }
         public async Task<IActionResult> Index()
         {
@@ -86,20 +88,13 @@ namespace Hostele.Areas.Admin.Controllers
                 return View();
             }
             
-            var currentUser = await _userManager.GetUserAsync(User);
-            var email = await _userManager.GetEmailAsync(currentUser);
+            var email = HttpContext.User.FindFirstValue(ClaimTypes.Email);
             
             var roles = await _userManager.GetRolesAsync(user);
             var result = await _userManager.RemoveFromRolesAsync(user, roles);
             
-            _context.Aktywnosci.Add(new Aktywnosc
-            {
-                User = email,
-                CzasAktywnosci = DateTime.Now,
-                OpisAktywnosci = $"Usunięto role użytkownikowi {userEmail}"
-            });
-            await _context.SaveChangesAsync();
-            
+            _repository.AddActivity(email, DateTime.Now, $"Usunięto role użytkownikowi {userEmail}");
+
             if (!result.Succeeded)
             {
                 ModelState.AddModelError("", "Cannot remove user existing roles");
@@ -113,13 +108,7 @@ namespace Hostele.Areas.Admin.Controllers
                 return View(model);
             }
             
-            _context.Aktywnosci.Add(new Aktywnosc
-            {
-                User = email,
-                CzasAktywnosci = DateTime.Now,
-                OpisAktywnosci = $"Dodano role do użytkownika {userEmail}"
-            });
-            await _context.SaveChangesAsync();
+            _repository.AddActivity(email, DateTime.Now, $"Dodano role do użytkownika {userEmail}");
             
             return RedirectToAction("Index");
         }
@@ -157,14 +146,8 @@ namespace Hostele.Areas.Admin.Controllers
             
             var currentUser = await _userManager.GetUserAsync(User);
             var email = await _userManager.GetEmailAsync(currentUser);
-
-            _context.Aktywnosci.Add(new Aktywnosc
-            {
-                User = email,
-                CzasAktywnosci = DateTime.Now,
-                OpisAktywnosci = $"Usunięto użytkownika {userEmail}"
-            });
-            await _context.SaveChangesAsync();
+            
+            _repository.AddActivity(email, DateTime.Now, $"Usunięto użytkownika {userEmail}");
             
             return RedirectToAction("Index");
         }
@@ -206,14 +189,8 @@ namespace Hostele.Areas.Admin.Controllers
                 
                 var currentUser = await _userManager.GetUserAsync(User);
                 var email = await _userManager.GetEmailAsync(currentUser);
-
-                _context.Aktywnosci.Add(new Aktywnosc
-                {
-                    User = email,
-                    CzasAktywnosci = DateTime.Now,
-                    OpisAktywnosci = $"Zablokowano usera {userEmail}"
-                });
-                await _context.SaveChangesAsync();
+                
+                _repository.AddActivity(email, DateTime.Now, $"Zablokowano usera {userEmail}");
 
                 return RedirectToAction("Index");
             }
@@ -255,14 +232,8 @@ namespace Hostele.Areas.Admin.Controllers
 
             var currentUser = await _userManager.GetUserAsync(User);
             var email = await _userManager.GetEmailAsync(currentUser);
-
-            _context.Aktywnosci.Add(new Aktywnosc
-            {
-                User = email,
-                CzasAktywnosci = DateTime.Now,
-                OpisAktywnosci = $"Odblokowano usera {userEmail}"
-            });
-            await _context.SaveChangesAsync();
+            
+            _repository.AddActivity(email, DateTime.Now, $"Odblokowano usera {userEmail}");
             
             return RedirectToAction("Index");
         }

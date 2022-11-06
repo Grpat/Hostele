@@ -12,8 +12,19 @@ public class ActivitiesRepository: Repository<Aktywnosc>, IActivitiesRepository
         _db = db;
     }
 
-    public List<Aktywnosc> GetAll()
+    public Task<List<Aktywnosc>> GetAll()
     {
-        return _db.Aktywnosci;
+        return Task.FromResult(_db.Aktywnosci.ToList());
+    }
+
+    public async void AddActivity(string user, DateTime activityTime, string description)
+    {
+        _db.Aktywnosci.Add(new Aktywnosc
+        {
+            User = user,
+            CzasAktywnosci = activityTime,
+            OpisAktywnosci = description
+        });
+        await _db.SaveChangesAsync();
     }
 }

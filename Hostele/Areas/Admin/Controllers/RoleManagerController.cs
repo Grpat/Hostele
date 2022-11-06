@@ -1,5 +1,7 @@
-﻿using Hostele.Data;
+﻿using System.Security.Claims;
+using Hostele.Data;
 using Hostele.Models;
+using Hostele.Repository;
 using Hostele.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -15,12 +17,13 @@ public class RoleManagerController : Controller
     // GET
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly UserManager<AppUser> _userManager;
-    private ApplicationDbContext _context;
-    public RoleManagerController(RoleManager<IdentityRole> roleManager, UserManager<AppUser> userManager, ApplicationDbContext context)
+    private readonly IActivitiesRepository _repository;
+
+    public RoleManagerController(RoleManager<IdentityRole> roleManager, UserManager<AppUser> userManager, IActivitiesRepository repository)
     {
         _roleManager = roleManager;
         _userManager = userManager;
-        _context = context;
+        _repository = repository;
     }
     public async Task<IActionResult> Index()
     {
@@ -33,16 +36,9 @@ public class RoleManagerController : Controller
         if (roleName != null)
         {
             await _roleManager.CreateAsync(new IdentityRole(roleName.Trim()));
-            var user = await _userManager.GetUserAsync(User);
-            var email = await _userManager.GetEmailAsync(user);
+            var email = HttpContext.User.FindFirstValue(ClaimTypes.Email);
 
-            _context.Aktywnosci.Add(new Aktywnosc
-            {
-                User = email,
-                CzasAktywnosci = DateTime.Now,
-                OpisAktywnosci = $"Dodano rolę {roleName.Trim()}"
-            });
-            await _context.SaveChangesAsync();
+            _repository.AddActivity(email, DateTime.Now, $"Dodano rolę {roleName.Trim()}");
         }
         return RedirectToAction("Index");
     }

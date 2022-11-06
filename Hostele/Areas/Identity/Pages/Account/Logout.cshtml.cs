@@ -3,10 +3,12 @@
 #nullable disable
 
 using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Hostele.Data;
 using Microsoft.AspNetCore.Authorization;
 using Hostele.Models;
+using Hostele.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -18,30 +20,23 @@ namespace Hostele.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<AppUser> _signInManager;
         private readonly ILogger<LogoutModel> _logger;
-        private ApplicationDbContext _context;
+        private readonly IActivitiesRepository _repository;
 
-        public LogoutModel(SignInManager<AppUser> signInManager, ILogger<LogoutModel> logger, ApplicationDbContext context)
+        public LogoutModel(SignInManager<AppUser> signInManager, ILogger<LogoutModel> logger, IActivitiesRepository repository)
         {
             _signInManager = signInManager;
             _logger = logger;
-            _context = context;
+            _repository = repository;
         }
 
         public async Task<IActionResult> OnPost(string returnUrl = null)
         {
-            var user = await _signInManager.UserManager.GetUserAsync(User);
-            var email = await _signInManager.UserManager.GetEmailAsync(user);
+            var email = HttpContext.User.FindFirstValue(ClaimTypes.Email);
             
             await _signInManager.SignOutAsync();
             _logger.LogInformation("User logged out.");
-
-            _context.Aktywnosci.Add(new Aktywnosc
-            {
-                User = email,
-                CzasAktywnosci = DateTime.Now,
-                OpisAktywnosci = "Wylogowywanie"
-            });
-            await _context.SaveChangesAsync();
+            
+            _repository.AddActivity(email, DateTime.Now, "Wylogowywanie");
             
             if (returnUrl != null)
             {

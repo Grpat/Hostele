@@ -19,6 +19,7 @@ builder.Services.AddIdentity<AppUser,IdentityRole>().AddEntityFrameworkStores<Ap
     .AddDefaultUI()
     .AddDefaultTokenProviders();
 builder.Services.AddScoped<IDbInitializer, DbInitializer>();
+builder.Services.AddScoped<IActivitiesRepository, ActivitiesRepository>();
 
 
 builder.Services.ConfigureApplicationCookie(options =>

@@ -13,6 +13,8 @@ public class ApplicationDbContext:IdentityDbContext<AppUser>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<Aktywnosc>().HasKey(x => x.Id);
     }
     
     public DbSet<AppUser> AppUsers { get; set; }
@@ -20,6 +22,6 @@ public class ApplicationDbContext:IdentityDbContext<AppUser>
     public DbSet<Pokoj> Pokoje { get; set; }
     public DbSet<Wypozyczenie> Wypozyczenia { get; set; }
     public DbSet<Rodzaj> Rodzaje { get; set; }
-    public List<Aktywnosc> Aktywnosci { get; set; }
+    public DbSet<Aktywnosc> Aktywnosci { get; set; }
     
 }

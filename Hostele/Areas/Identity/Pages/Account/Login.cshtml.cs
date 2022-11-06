@@ -1,5 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+
 #nullable disable
 
 using System;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 using Hostele.Data;
 using Microsoft.AspNetCore.Authorization;
 using Hostele.Models;
+using Hostele.Repository;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -25,14 +27,15 @@ namespace Hostele.Areas.Identity.Pages.Account
         private readonly SignInManager<AppUser> _signInManager;
         private readonly ILogger<LoginModel> _logger;
         private readonly UserManager<AppUser> _userManager;
-        private ApplicationDbContext _context;
+        private readonly IActivitiesRepository _repository;
 
-        public LoginModel(SignInManager<AppUser> signInManager, ILogger<LoginModel> logger,UserManager<AppUser> userManager, IHttpContextAccessor httpContextAccessor, ApplicationDbContext context)
+        public LoginModel(SignInManager<AppUser> signInManager, ILogger<LoginModel> logger,
+            UserManager<AppUser> userManager, IHttpContextAccessor httpContextAccessor, IActivitiesRepository repository)
         {
             _signInManager = signInManager;
             _logger = logger;
             _userManager = userManager;
-            _context = context;
+            _repository = repository;
         }
 
         /// <summary>
@@ -118,32 +121,31 @@ namespace Hostele.Areas.Identity.Pages.Account
             {
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe,
+                    lockoutOnFailure: false);
                 if (result.Succeeded)
                 {
-                    
                     var user = await _userManager.FindByEmailAsync(Input.Email);
-                    
+
                     if (!user.IsInitialLogin)
                     {
+                        _repository.AddActivity(Input.Email, DateTime.Now, $"Logowanie użytkownika {Input.Email}");
                         return Redirect("Manage/ChangePassword");
                     }
+
                     _logger.LogInformation("User logged in.");
 
-                    _context.Aktywnosci.Add(new Aktywnosc
-                    {
-                        User = Input.Email,
-                        CzasAktywnosci = DateTime.Now,
-                        OpisAktywnosci = "Logowanie"
-                    });
-                    await _context.SaveChangesAsync();
-                    
+                    _repository.AddActivity(Input.Email, DateTime.Now, $"Logowanie użytkownika {Input.Email}");
+
                     return LocalRedirect(returnUrl);
                 }
+
                 if (result.RequiresTwoFactor)
                 {
-                    return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
+                    return RedirectToPage("./LoginWith2fa",
+                        new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
                 }
+
                 if (result.IsLockedOut)
                 {
                     _logger.LogWarning("User account locked out.");
