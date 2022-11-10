@@ -1,0 +1,26 @@
+﻿@model Hostele.Areas.Admin.ViewModels.LoginSettingsViewModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "User Login Setting";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col-md-4">
+        <form asp-controller="UserRoles" asp-action="LoginSettings">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="MaxFailedAttempts" class="control-label"></label>
+                <input asp-for="MaxFailedAttempts" class="form-control" />
+                <span asp-validation-for="MaxFailedAttempts" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SessionTimeout" class="control-label"></label>
+                <input asp-for="SessionTimeout" class="form-control" />
+                <span asp-validation-for="SessionTimeout" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Submit" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
