@@ -2,6 +2,7 @@ using Hostele.Data;
 using Hostele.Models;
 using Hostele.Repository;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,9 +14,15 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseInMemoryDatabase(databaseName: "chuj");
 });
 
+
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddIdentity<AppUser,IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>()
+builder.Services.AddIdentity<AppUser,IdentityRole>(opt =>
+    {
+        opt.Lockout.AllowedForNewUsers = true;
+        opt.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+        opt.Lockout.MaxFailedAccessAttempts = 10;
+    }).AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultUI()
     .AddDefaultTokenProviders();
 builder.Services.AddScoped<IDbInitializer, DbInitializer>();

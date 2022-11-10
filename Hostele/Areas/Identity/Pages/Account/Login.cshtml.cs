@@ -122,10 +122,12 @@ namespace Hostele.Areas.Identity.Pages.Account
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe,
-                    lockoutOnFailure: false);
+                    lockoutOnFailure: true);
                 if (result.Succeeded)
                 {
                     var user = await _userManager.FindByEmailAsync(Input.Email);
+                    user.AccessFailedCount = 0;
+                   
 
                     if (!user.IsInitialLogin)
                     {
@@ -153,6 +155,16 @@ namespace Hostele.Areas.Identity.Pages.Account
                 }
                 else
                 {
+                    var user = await _userManager.FindByEmailAsync(Input.Email);
+                    user.AccessFailedCount ++;
+                    
+                    if (user.AccessFailedCount > user.MaxLoginAttempts)
+                    {
+                        await _userManager.SetLockoutEnabledAsync(user, true);
+                        await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.Now.AddMinutes(15));
+                        ModelState.AddModelError(string.Empty, "Max login count reached, try again in 15 minutes.");
+                        return Page();
+                    }
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                     return Page();
                 }

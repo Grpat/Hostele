@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Security.Claims;
+using Hostele.Areas.Admin.ViewModels;
 using Hostele.Data;
 using Hostele.Models;
 using Hostele.Repository;
@@ -30,7 +31,7 @@ namespace Hostele.Areas.Admin.Controllers
         {
             var users = await _userManager.Users.ToListAsync();
             var admins = await _userManager.GetUsersInRoleAsync(SD.Role_Admin);
-                
+            
             foreach (var admin in admins)
             {
                 users.RemoveAll(c => c.Id == admin.Id);
@@ -237,13 +238,89 @@ namespace Hostele.Areas.Admin.Controllers
             
             return RedirectToAction("Index");
         }
-
-        
-        
         
         private async Task<List<string>> GetUserRoles(AppUser user)
         {
             return new List<string>(await _userManager.GetRolesAsync(user));
+        }
+        
+        
+        /*public async Task<IActionResult> UserCredentials(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound($"Unable to load user with ID '{userId}'.");
+            }
+            return View();
+        }
+        [HttpPost]
+        [HttpPost, ActionName("UserCredentials")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UserCredentialsPost(UserCredentialsViewModel userCredentialsViewModel,string userId)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View();
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound($"Unable to load user with ID '{userId}'.");
+            }
+            var email = await _userManager.GetEmailAsync(user);
+            
+
+           // var changePasswordResult = await _userManager.ChangePasswordAsync(user, userCredentialsViewModel.OldPassword, userCredentialsViewModel.NewPassword);
+            /if (!changePasswordResult.Succeeded)
+            {
+                foreach (var error in changePasswordResult.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+                return View();
+            }
+            
+            _repository.AddActivity(email, DateTime.Now, $"Zmieniono hasło");
+
+            return RedirectToAction("Index");
+        }*/
+        
+        
+        public async Task<IActionResult> LoginSettings(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound($"Unable to load user with ID '{userId}'.");
+            }
+            var viewModel = new LoginSettingsViewModel()
+            {
+                MaxFailedAttempts = 5,
+                SessionTimeout = 20
+            };
+            return View(viewModel);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> LoginSettings(LoginSettingsViewModel loginSettingsViewModel, string userId)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    return NotFound($"Unable to load user with ID '{userId}'.");
+                }
+                
+                user.MaxLoginAttempts = loginSettingsViewModel.MaxFailedAttempts;
+                user.SessionTimeoout = loginSettingsViewModel.SessionTimeout;
+                await _userManager.UpdateAsync(user);
+                return View(loginSettingsViewModel);
+            }
+            return View();
         }
     }
 }
