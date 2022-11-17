@@ -45,8 +45,12 @@
             <td>
                 <a class="btn btn-danger" asp-controller="UserRoles" asp-action="Delete" asp-route-userId="@user.UserId">Delete</a>
             </td>
+            <td>
+                <a class="btn btn-danger" asp-controller="UserRoles" asp-action="LoginSettings" asp-route-userId="@user.UserId">LoginSettings</a>
+            </td>
              <td>
-                 <a class="btn btn-danger" asp-controller="UserRoles" asp-action="LoginSettings" asp-route-userId="@user.UserId">LoginSettings</a>
+             <a class="btn btn-danger" asp-controller="UserRoles" asp-action="GeneratePassword" asp-route-userId="@user.UserId">Generate Password</a>
+             </td>
         </tr>
     }
     </tbody>

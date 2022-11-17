@@ -161,9 +161,13 @@ namespace Hostele.Areas.Identity.Pages.Account
                     if (user.AccessFailedCount > user.MaxLoginAttempts)
                     {
                         await _userManager.SetLockoutEnabledAsync(user, true);
-                        await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.Now.AddMinutes(15));
-                        ModelState.AddModelError(string.Empty, "Max login count reached, try again in 15 minutes.");
-                        return Page();
+                        if (user.LockoutEnd == null)
+                        {
+                            await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.Now.AddMinutes(15));
+                            ModelState.AddModelError(string.Empty, "Max login count reached, try again in 15 minutes.");
+                        }
+                        
+                        /*return Page();*/
                     }
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                     return Page();

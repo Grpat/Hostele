@@ -15,7 +15,6 @@
                 data: JSON.stringify(data),
                 contentType: 'application/json',
                 success: function (response) {
-                    console.log(counter);
                     window.location.href = response.redirectToUrl;
                 }
             });

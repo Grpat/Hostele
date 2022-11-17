@@ -20,6 +20,7 @@ namespace Hostele.Areas.Admin.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IActivitiesRepository _repository;
+        
 
         public UserRolesController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, IActivitiesRepository repository)
         {
@@ -245,47 +246,33 @@ namespace Hostele.Areas.Admin.Controllers
         }
         
         
-        /*public async Task<IActionResult> UserCredentials(string userId)
+        public async Task<IActionResult> GeneratePassword(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{userId}'.");
-            }
+            if (user == null) return NotFound($"Unable to load user with ID '{userId}'.");
+            
             return View();
         }
         [HttpPost]
-        [HttpPost, ActionName("UserCredentials")]
+        [HttpPost, ActionName("GeneratePassword")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UserCredentialsPost(UserCredentialsViewModel userCredentialsViewModel,string userId)
+        public async Task<IActionResult>GeneratePassword(GeneratePasswordViewModel generatePasswordViewModel,string userId)
         {
-            if (!ModelState.IsValid)
-            {
-                return View();
-            }
-
             var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{userId}'.");
-            }
-            var email = await _userManager.GetEmailAsync(user);
-            
+            if (user == null) return NotFound($"Unable to load user with ID '{userId}'.");
 
-           // var changePasswordResult = await _userManager.ChangePasswordAsync(user, userCredentialsViewModel.OldPassword, userCredentialsViewModel.NewPassword);
-            /if (!changePasswordResult.Succeeded)
-            {
-                foreach (var error in changePasswordResult.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
-                return View();
-            }
+            var generatedPassword =
+                await FunkcjaJednokierunkowa(generatePasswordViewModel.a, generatePasswordViewModel.x);
+            user.GeneratedPassword = generatedPassword;
+            await _userManager.UpdateAsync(user);
+            
+            
+            var email = await _userManager.GetEmailAsync(user);
             
             _repository.AddActivity(email, DateTime.Now, $"Zmieniono hasło");
 
             return RedirectToAction("Index");
-        }*/
+        }
         
         
         public async Task<IActionResult> LoginSettings(string userId)
@@ -321,6 +308,11 @@ namespace Hostele.Areas.Admin.Controllers
                 return View(loginSettingsViewModel);
             }
             return View();
+        }
+
+        private async Task<double> FunkcjaJednokierunkowa(int a, int x )
+        {
+            return a * Math.Sin(x);
         }
     }
 }

@@ -39,10 +39,8 @@ public class HomeController : Controller
             {
                 await _signInManager.SignOutAsync();
             }
-
-            return Json(new { redirectToUrl = Url.Page("/Account/Login", new { area = "Identity" })});
         }
-        return Json("");
+        return Json(new { redirectToUrl = Url.Page("/Account/Login", new { area = "Identity" })});
     }
 
     public record Time(int count);
