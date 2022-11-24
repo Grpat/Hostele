@@ -1,6 +1,8 @@
 using Hostele.Data;
 using Hostele.Models;
 using Hostele.Repository;
+using Hostele.Services;
+using Hostele.Utility;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,8 +15,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseInMemoryDatabase(databaseName: "chuj");
 });
-
-
+builder.Services.AddTransient<GoogleCaptchaService>(); 
+builder.Services.Configure<GoogleCaptchaConfig>(builder.Configuration.GetSection("GoogleReCaptcha"));
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddIdentity<AppUser,IdentityRole>(opt =>

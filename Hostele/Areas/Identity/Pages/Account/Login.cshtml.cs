@@ -13,6 +13,7 @@ using Hostele.Data;
 using Microsoft.AspNetCore.Authorization;
 using Hostele.Models;
 using Hostele.Repository;
+using Hostele.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -28,14 +29,16 @@ namespace Hostele.Areas.Identity.Pages.Account
         private readonly ILogger<LoginModel> _logger;
         private readonly UserManager<AppUser> _userManager;
         private readonly IActivitiesRepository _repository;
+        private readonly GoogleCaptchaService _googleCaptchaService;
 
         public LoginModel(SignInManager<AppUser> signInManager, ILogger<LoginModel> logger,
-            UserManager<AppUser> userManager, IHttpContextAccessor httpContextAccessor, IActivitiesRepository repository)
+            UserManager<AppUser> userManager, IHttpContextAccessor httpContextAccessor, IActivitiesRepository repository, GoogleCaptchaService googleCaptchaService)
         {
             _signInManager = signInManager;
             _logger = logger;
             _userManager = userManager;
             _repository = repository;
+            _googleCaptchaService = googleCaptchaService;
         }
 
         /// <summary>
@@ -92,6 +95,8 @@ namespace Hostele.Areas.Identity.Pages.Account
             /// </summary>
             [Display(Name = "Remember me?")]
             public bool RememberMe { get; set; }
+            [Required]
+            public string Token { get; set; }
         }
 
         public async Task OnGetAsync(string returnUrl = null)
@@ -116,7 +121,10 @@ namespace Hostele.Areas.Identity.Pages.Account
             returnUrl ??= Url.Content("~/");
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-
+            
+            var captchaResult = await _googleCaptchaService.VerifyToken(Input.Token);
+            if (!captchaResult) return Page();
+            
             if (ModelState.IsValid)
             {
                 // This doesn't count login failures towards account lockout
