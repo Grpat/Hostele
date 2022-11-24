@@ -1,3 +1,4 @@
+using DNTCaptcha.Core;
 using Hostele.Data;
 using Hostele.Models;
 using Hostele.Repository;
@@ -29,6 +30,24 @@ builder.Services.AddIdentity<AppUser,IdentityRole>(opt =>
     .AddDefaultTokenProviders();
 builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 builder.Services.AddScoped<IActivitiesRepository, ActivitiesRepository>();
+builder.Services.AddDNTCaptcha(options =>
+{
+    // options.UseCookieStorageProvider()
+    //     .ShowThousandsSeparators(false).WithEncryptionKey("123456");
+    options.UseCookieStorageProvider(SameSiteMode.Strict)
+        .AbsoluteExpiration(minutes: 7)
+        .ShowThousandsSeparators(false)
+        .WithNoise(pixelsDensity: 25, linesCount: 3)
+        .WithEncryptionKey("This is my secure key!")
+        .InputNames(
+            new DNTCaptchaComponent
+            {
+                CaptchaHiddenInputName = "DNT_CaptchaText",
+                CaptchaHiddenTokenName = "DNT_CaptchaToken",
+                CaptchaInputName = "DNT_CaptchaInputText"
+            })
+        .Identifier("dnt_Captcha");
+});
 
 
 builder.Services.ConfigureApplicationCookie(options =>
