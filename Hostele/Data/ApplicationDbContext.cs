@@ -23,5 +23,6 @@ public class ApplicationDbContext:IdentityDbContext<AppUser>
     public DbSet<Wypozyczenie> Wypozyczenia { get; set; }
     public DbSet<Rodzaj> Rodzaje { get; set; }
     public DbSet<Aktywnosc> Aktywnosci { get; set; }
+    public DbSet<CaptchaImages> CaptchaImages { get; set; }
     
 }

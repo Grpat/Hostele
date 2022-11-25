@@ -33,7 +33,30 @@ public class DbInitializer:IDbInitializer
 
         }
 
-        if (!_roleManager.RoleExistsAsync(SD.Role_Admin).GetAwaiter().GetResult())
+        var captchaImagesList = new List<CaptchaImages>()
+        {
+            new()
+            {
+                Path = "captcha1.jpg",
+                Answer = "zamienniki"
+            },
+            new()
+            {
+                Path = "captcha2.jpg",
+                Answer = "recykling"
+            },
+            new()
+            {
+                Path = "captcha3.jpg",
+                Answer = "nurkowanie"
+            }
+        };
+        _db.CaptchaImages.AddRange(captchaImagesList);
+        _db.SaveChanges();
+        
+
+
+            if (!_roleManager.RoleExistsAsync(SD.Role_Admin).GetAwaiter().GetResult())
         {
             _roleManager.CreateAsync(new IdentityRole(SD.Role_Admin)).GetAwaiter().GetResult();
             _roleManager.CreateAsync(new IdentityRole(SD.Role_Staff)).GetAwaiter().GetResult();

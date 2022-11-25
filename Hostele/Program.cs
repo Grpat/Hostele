@@ -29,6 +29,7 @@ builder.Services.AddIdentity<AppUser,IdentityRole>(opt =>
     .AddDefaultTokenProviders();
 builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 builder.Services.AddScoped<IActivitiesRepository, ActivitiesRepository>();
+builder.Services.AddScoped<ICaptchaImagesRepository, CaptchaImagesRepository>();
 
 
 builder.Services.ConfigureApplicationCookie(options =>
