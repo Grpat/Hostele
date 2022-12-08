@@ -87,6 +87,7 @@ app.MapControllerRoute(
 
 
 
+Cipher.GenerateCipher("ala ma kota");
 
 app.Run();
 

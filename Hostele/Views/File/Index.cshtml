@@ -1,0 +1,23 @@
+﻿@{
+    ViewData["Title"] = "Files";
+}
+
+<div>
+    @using (Html.BeginForm("Index", "File", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        <span>Wybierz plik:</span>
+        <input type="file" name="postedFile"/>
+        @if(!User.IsInRole("Admin"))
+        {
+            <span>Podaj kod dostępu</span>
+            <input type="text" name="cipher"/>
+            <span>Podaj klucz</span>
+            <input type="text" name="key"/>
+        }
+        <hr/>
+        <input type="submit" value="Upload"/>
+        <br/>
+        <span style="color:green">@ViewBag.Message</span>
+        <span style="color: red">@ViewBag.ErrorMessage</span>
+    }
+</div>
